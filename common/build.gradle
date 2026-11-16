@@ -1,0 +1,5 @@
+plugins {
+    id 'java-library'
+}
+
+// Shared event contracts used by both services. No Spring dependency on purpose.

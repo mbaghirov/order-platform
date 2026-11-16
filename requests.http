@@ -1,0 +1,59 @@
+### Create product 1
+POST http://localhost:8081/api/products
+Content-Type: application/json
+
+{ "name": "Mechanical Keyboard", "description": "RGB, hot-swap switches", "price": 45.00, "stockQuantity": 10 }
+
+### Create product 2
+POST http://localhost:8081/api/products
+Content-Type: application/json
+
+{ "name": "Wireless Mouse", "price": 20.00, "stockQuantity": 5 }
+
+### Get product (second call comes from Redis)
+GET http://localhost:8081/api/products/1
+
+### Place an order (10% discount above 100.00)
+POST http://localhost:8081/api/orders
+Content-Type: application/json
+
+{
+  "customerEmail": "customer@example.com",
+  "items": [
+    { "productId": 1, "quantity": 2 },
+    { "productId": 2, "quantity": 1 }
+  ]
+}
+
+### Try to buy more than in stock -> 409
+POST http://localhost:8081/api/orders
+Content-Type: application/json
+
+{ "customerEmail": "customer@example.com", "items": [ { "productId": 2, "quantity": 99 } ] }
+
+### Pay
+PATCH http://localhost:8081/api/orders/1/status
+Content-Type: application/json
+
+{ "status": "PAID" }
+
+### Ship
+PATCH http://localhost:8081/api/orders/1/status
+Content-Type: application/json
+
+{ "status": "SHIPPED" }
+
+### Invalid transition (SHIPPED -> CANCELLED) -> 409
+PATCH http://localhost:8081/api/orders/1/status
+Content-Type: application/json
+
+{ "status": "CANCELLED" }
+
+### Customer orders
+GET http://localhost:8081/api/orders?customerEmail=customer@example.com
+
+### Notifications for the order (created from Kafka events)
+GET http://localhost:8082/api/notifications/orders/1
+
+### Notifications for the customer
+GET http://localhost:8082/api/notifications?recipient=customer@example.com
